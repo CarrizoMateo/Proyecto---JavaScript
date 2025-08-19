@@ -1,48 +1,128 @@
 body {
-  font-family: Arial, sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   margin: 0;
   padding: 0;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start; /* Cambia a center si querés centrar vertical completo */
-  background-color: #fff;
+  background-color: #f8f9fa;
 }
 
-main {
+header {
+  background-color: #1a8170;
+  padding: 20px;
   text-align: center;
-  margin-top: 40px;
+  border-bottom: solid 1px #ccc;
 }
 
-form {
-  margin-bottom: 20px;
+h1 {
+  text-align: center;
+  color: #000000;
 }
 
-footer {
-  margin-top: 30px;
+#store-container {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  justify-content: center;
+  padding: 20px;
+  gap: 20px;
 }
 
-button {
-  margin: 5px;
-  padding: 8px 16px;
+#store-container .item {
+  background: #fff;
+  border-radius: 10px;
+  border: solid 1px #ccc;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  padding: 20px;
+  text-align: center;
+  width: 220px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#store-container .item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+#shopping-figus-container {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 320px;
+  height: 100vh;
+  background-color: white;
+  border-left: solid 1px #ccc;
+  padding: 15px;
+  box-shadow: -3px 0 6px rgba(0,0,0,0.1);
+  transform: translateX(100%); /* oculto por defecto */
+  transition: transform 0.3s ease;
+  z-index: 1000;
+}
+
+#shopping-figus-container.show {
+  transform: translateX(0); /* entra en pantalla */
+}
+
+#shopping-figus-container.hide {
+  transform: translateX(100%); /* se esconde otra vez */
+}
+
+/* Botón de cierre */
+#shopping-figus-container .close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: crimson;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 16px;
   cursor: pointer;
 }
 
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+
+.show {
+  display: block;
 }
 
-button.seleccionado {
-  background-color: green;
-  color: white;
+.hide {
+  display: none;
+}
+
+.item .title {
   font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.item .price {
+  font-weight: bold;
+  color: #157e25;
+  margin-bottom: 5px;
+}
+
+.item .qty {
+  margin-bottom: 10px;
+}
+
+.total {
+  padding: 15px 0;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  border-top: 1px solid #ccc;
+  margin-top: 10px;
+}
+
+button {
   border: none;
+  background-color: khaki;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s ease;
 }
 
-#resultadoInscripcion {
-  margin-top: 20px;
-  font-weight: bold;
-  color: green;
+button:hover {
+  background-color: #e6da63;
 }

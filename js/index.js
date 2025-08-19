@@ -1,112 +1,194 @@
-const materias = [
-  { id: 1, nombre: "Matemáticas" },
-  { id: 2, nombre: "Historia" },
-  { id: 3, nombre: "Física" },
-  { id: 4, nombre: "Literatura" },
-  { id: 5, nombre: "Química" },
-];
-
-const formNombre = document.getElementById("formNombre");
-const inputNombre = document.getElementById("nombre");
-const saludoDiv = document.getElementById("saludo");
-const materiasContainer = document.getElementById("materiasContainer");
-const resultadoInscripcion = document.getElementById("resultadoInscripcion");
-const btnLimpiar = document.getElementById("btnLimpiar");
-
-const STORAGE_KEY = "inscripcionColegio";
-
-let estadoInscripcion = {
-  nombre: "",
-  materiaId: null,
+const db = {
+  methods: {
+    find: (id) => {
+      return db.items.find(item => item.id === id);
+    },
+    remove: (items) => {
+      items.forEach(item => {
+        const product = db.methods.find(item.id);
+        product.qty = product.qty - item.qty;
+      });
+    },
+  },
+  items: [
+    {
+      id: 0,
+      title: "Figuritas de futbol",
+      price: 700,
+      qty: "Stock: 756",
+    },
+    {
+      id: 1,
+      title: "Figuritas especiales",
+      price: 900,
+      qty: "Stock: 2726",
+    },
+    {
+      id: 2,
+      title: "Album de figuritas",
+      price: 3000,
+      qty: "Stock: 643",
+    },
+  ],
 };
 
-function guardarInscripcion() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(estadoInscripcion));
-}
+const shoppingFigus = { 
+  items: [],
+  methods: { 
+    add: (id, qty) => {
+      const figusItem = shoppingFigus.methods.get(id);
+      if (figusItem) {
+        if (shoppingFigus.methods.hasInventory(id, qty + figusItem.qty)) {
+          figusItem.qty += qty;
+        } else {
+          alert("No hay suficiente stock para agregar esa cantidad.");
+        }
+      } else {
+        shoppingFigus.items.push({id, qty});
+      }  
+    },
+    remove: (id, qty) => {
+      const figusItem = shoppingFigus.methods.get(id);
+      if (figusItem && figusItem.qty - qty > 0) {
+        figusItem.qty -= qty;
+      } else {
+        shoppingFigus.items = shoppingFigus.items.filter(item => item.id != id);
+      }
+    },
+    count: () => {
+      return shoppingFigus.items.reduce((acc, item) => acc + item.qty, 0);
+    },
+    get: (id) => {
+      const index = shoppingFigus.items.findIndex(item => item.id === id);
+      return index >= 0 ? shoppingFigus.items[index] : null;
+    },
+    getTotal: () => {
+      return shoppingFigus.items.reduce((acc, item) => {
+        const found = db.methods.find(item.id);
+        return acc + found.price * item.qty;
+      }, 0);
+    },
+    hasInventory: (id, qty) => {
+      return db.items.find(item => item.id === id).qty - qty >= 0;
+    },
+    purchase: () => {
+      db.methods.remove(shoppingFigus.items);
+      shoppingFigus.items = [];
+      alert("Compra realizada con éxito");
+    },  
+  },
+};
 
-function cargarInscripcion() {
-  const data = localStorage.getItem(STORAGE_KEY);
-  if (data) {
-    estadoInscripcion = JSON.parse(data);
-  }
-}
+renderStore();
 
-function mostrarMaterias(activar = true) {
-  materiasContainer.innerHTML = "";
+function renderStore() { 
+  const html = db.items.map(item => {
+    return `
+    <div class="item">
+      <div>
+        <div class="title">${item.title}</div>
+        <div class="price">${numberToCurrency(item.price)}</div>
+        <div class="qty">${item.qty}</div>
+        <div class="actions">
+          <button class="add" data-id="${item.id}">Agregar</button>        
+        </div>
+      </div> 
+    </div>
+    `;
+  });
 
-  materias.forEach(({ id, nombre }) => {
-    const btn = document.createElement("button");
-    btn.textContent = nombre;
-    btn.type = "button";
-    btn.disabled = !activar;
-    btn.id = `materia-${id}`;
+  document.querySelector("#store-container").innerHTML = html.join("");
 
-    if (estadoInscripcion.materiaId === id) {
-      btn.classList.add("seleccionado");
-    }
+  document.querySelectorAll(".item .actions .add").forEach(button => { 
+    button.addEventListener("click", event => {
+      const id = parseInt(button.getAttribute("data-id"));
+      const item = db.methods.find(id);
 
-    btn.addEventListener("click", () => {
-      if (!activar) return;
-
-      estadoInscripcion.materiaId = id;
-      guardarInscripcion();
-      mostrarResultadoInscripcion();
+      if (item && item.qty - 1 > 0) {
+        shoppingFigus.methods.add(id, 1);
+        renderShoppingFigus();
+      } else {
+        alert("No hay suficiente stock para agregar esa cantidad.");
+      }
     });
-
-    materiasContainer.appendChild(btn);
   });
 }
 
-function mostrarResultadoInscripcion() {
-  const materia = materias.find((m) => m.id === estadoInscripcion.materiaId);
-  saludoDiv.textContent = `Hola, ${estadoInscripcion.nombre}! Has seleccionado la materia:`;
-  resultadoInscripcion.textContent = `${materia.nombre}`;
-  mostrarMaterias(false);
-  inputNombre.disabled = true;
-  formNombre.querySelector("button").disabled = true;
+function renderShoppingFigus () {
+  const html = shoppingFigus.items.map(item => {
+    const dbItem = db.methods.find(item.id);
+    return `
+    <div class="item">
+      <div class="title">${dbItem.title}</div>
+      <div class="price">${numberToCurrency(dbItem.price)}</div>
+      <div class="qty">${item.qty} unidades</div>
+      <div class="subtotal">subtotal: ${numberToCurrency(dbItem.price * item.qty)}</div>
+      <div class="actions">
+        <button class="addOne" data-id="${item.id}">+</button>
+        <button class="removeOne" data-id="${item.id}">-</button>        
+      </div>
+    </div>
+    `;
+  });  
+
+  const closeButton = `
+  <div class="figus-header">
+    <button class="bClose">Cerrar</button>
+  </div>
+  `;
+
+  const purchaseButton = shoppingFigus.items.length > 0 ? `
+  <div class="figus-actions">
+    <button class="bPurchase">Finaliza compra</button>
+  </div>
+  ` : "";
+
+  const total = shoppingFigus.methods.getTotal();
+  const totalContainer = `<div class="total">TOTAL: ${numberToCurrency(total)}</div>`;
+  const shoppingFigusContainer = document.querySelector("#shopping-figus-container");
+
+  shoppingFigusContainer.classList.remove("hide");
+  shoppingFigusContainer.classList.add("show");
+  shoppingFigusContainer.innerHTML = closeButton + html.join("") + totalContainer + purchaseButton;
+
+  // botones + y -
+  document.querySelectorAll(".addOne").forEach(button => { 
+    button.addEventListener("click", event => {
+      const id = parseInt(button.getAttribute("data-id"));
+      shoppingFigus.methods.add(id, 1);
+      renderShoppingFigus();
+    });
+  });
+
+  document.querySelectorAll(".removeOne").forEach(button => { 
+    button.addEventListener("click", event => {
+      const id = parseInt(button.getAttribute("data-id"));
+      shoppingFigus.methods.remove(id, 1);
+      renderShoppingFigus();
+    });
+  });
+
+  // cerrar
+  document.querySelector(".bClose").addEventListener("click", event => { 
+    shoppingFigusContainer.classList.remove("show");
+    shoppingFigusContainer.classList.add("hide");
+  });
+
+  // compra
+  document.querySelectorAll(".bPurchase").forEach(button => {
+    button.addEventListener("click", event => {
+      shoppingFigus.methods.purchase();
+      renderShoppingFigus();
+      renderStore();
+    });
+  });
 }
 
-function mostrarInscripcionGuardada() {
-  if (estadoInscripcion.nombre && estadoInscripcion.materiaId) {
-    const materia = materias.find((m) => m.id === estadoInscripcion.materiaId);
-    saludoDiv.textContent = `Hola, ${estadoInscripcion.nombre}! Ya estás inscripto en:`;
-    resultadoInscripcion.textContent = `${materia.nombre}`;
-    inputNombre.value = estadoInscripcion.nombre;
-    inputNombre.disabled = true;
-    formNombre.querySelector("button").disabled = true;
-    mostrarMaterias(false);
-  } else if (estadoInscripcion.nombre && !estadoInscripcion.materiaId) {
-    saludoDiv.textContent = `Hola, ${estadoInscripcion.nombre}! Elige una materia para inscribirte:`;
-    inputNombre.value = estadoInscripcion.nombre;
-    inputNombre.disabled = true;
-    formNombre.querySelector("button").disabled = true;
-    mostrarMaterias(true);
-  }
+function numberToCurrency(number) {
+  return new Intl.NumberFormat("es-AR", {
+    maximumSignificantDigits: 2,
+    style: "currency",
+    currency: "ARS",
+  }).format(number);
 }
 
-formNombre.addEventListener("submit", (e) => {
-  e.preventDefault();
-
-  const nombreIngresado = inputNombre.value.trim();
-  if (nombreIngresado === "") return;
-
-  estadoInscripcion.nombre = nombreIngresado;
-  estadoInscripcion.materiaId = null;
-  guardarInscripcion();
-
-  saludoDiv.textContent = `Hola, ${estadoInscripcion.nombre}! Elige una materia para inscribirte:`;
-  resultadoInscripcion.textContent = "";
-
-  inputNombre.disabled = true;
-  formNombre.querySelector("button").disabled = true;
-
-  mostrarMaterias(true);
-});
-
-btnLimpiar.addEventListener("click", () => {
-  localStorage.removeItem(STORAGE_KEY);
-  location.reload();
-});
-
-cargarInscripcion();
-mostrarInscripcionGuardada();
