@@ -1,0 +1,5 @@
+[
+    { "id": 0, "title": "Figuritas de futbol", "price": 700, "qty": 756 },
+    { "id": 1, "title": "Figuritas especiales", "price": 900, "qty": 226 },
+    { "id": 2, "title": "Album de figuritas", "price": 3000, "qty": 643 }
+]

@@ -52,17 +52,17 @@ h1 {
   border-left: solid 1px #ccc;
   padding: 15px;
   box-shadow: -3px 0 6px rgba(0,0,0,0.1);
-  transform: translateX(100%); /* oculto por defecto */
+  transform: translateX(100%);
   transition: transform 0.3s ease;
   z-index: 1000;
 }
 
 #shopping-figus-container.show {
-  transform: translateX(0); /* entra en pantalla */
+  transform: translateX(0);
 }
 
 #shopping-figus-container.hide {
-  transform: translateX(100%); /* se esconde otra vez */
+  transform: translateX(100%);
 }
 
 /* Botón de cierre */
